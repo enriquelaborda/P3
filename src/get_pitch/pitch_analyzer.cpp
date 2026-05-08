@@ -12,6 +12,21 @@ namespace upc {
 
     for (unsigned int l = 0; l < r.size(); ++l) {
   		/// \TODO Compute the autocorrelation r[l]
+      /**
+      \DONE Autocorrelación calculada
+      \f[
+      r[l] = \frac{1}{N} \sum_{n=l}^{n=N} x[n] \cdot x[n-l]
+      \f]
+      1. Inicialitzem \f$r[l]\f$ a zero
+      2. Acumulem el prducte de \f$x[n]\f$ per \f$x[n-l]\f$ per a \f$l\le n < N\f$
+      3. Dividim resultat per \f$N\f$
+      */
+
+      r[l] = 0;
+      for (unsigned int n = l; n < x.size(); n++) {
+        r[l] = r[l] + x[n] * x[n - l];
+      }
+      r[l] = r[l] / x.size();
     }
 
     if (r[0] == 0.0F) //to avoid log() and divide zero 
@@ -50,7 +65,12 @@ namespace upc {
     /// \TODO Implement a rule to decide whether the sound is voiced or not.
     /// * You can use the standard features (pot, r1norm, rmaxnorm),
     ///   or compute and use other ones.
-    return true;
+
+    //Normalizar señal en get_pitch!! --> pot > 0.5 ||
+    if (pot > 0.5 || r1norm > 0.5 || rmaxnorm > 0.3)
+      return false;
+    else
+      return true;
   }
 
   float PitchAnalyzer::compute_pitch(vector<float> & x) const {
@@ -66,7 +86,7 @@ namespace upc {
     //Compute correlation
     autocorrelation(x, r);
 
-    vector<float>::const_iterator iR = r.begin(), iRMax = iR;
+    vector<float>::const_iterator iR = r.begin(), iRMax = r.begin() + npitch_min;
 
     /// \TODO 
 	/// Find the lag of the maximum value of the autocorrelation away from the origin.<br>
@@ -75,6 +95,14 @@ namespace upc {
 	///    - The lag corresponding to the maximum value of the pitch.
     ///	   .
 	/// In either case, the lag should not exceed that of the minimum value of the pitch.
+
+    
+    for (iR = iRMax; (iR < r.begin() + npitch_max - 1 && iR < r.end()); iR++){
+      if(*iR > *iRMax){
+        iRMax = iR;
+ 
+      }
+    }
 
     unsigned int lag = iRMax - r.begin();
 
