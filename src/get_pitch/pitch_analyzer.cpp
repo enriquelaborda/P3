@@ -42,6 +42,9 @@ namespace upc {
     switch (win_type) {
     case HAMMING:
       /// \TODO Implement the Hamming window
+      for (unsigned int i = 0; i < frameLen; i++) {
+        window[i] = 0.53836F - 0.46164F * cos(2.0F * M_PI * i / (frameLen - 1));
+      }
       break;
     case RECT:
     default:
@@ -65,12 +68,10 @@ namespace upc {
     /// \TODO Implement a rule to decide whether the sound is voiced or not.
     /// * You can use the standard features (pot, r1norm, rmaxnorm),
     ///   or compute and use other ones.
-
-    //Normalizar señal en get_pitch!! --> pot > 0.5 ||
-    if (pot > 0.5 || r1norm > 0.5 || rmaxnorm > 0.3)
-      return false;
-    else
+    if (pot < llindar_pot || r1norm < llindar_r1norm || rmaxnorm < llindar_rmaxnorm)
       return true;
+    else
+      return false;
   }
 
   float PitchAnalyzer::compute_pitch(vector<float> & x) const {
@@ -96,11 +97,20 @@ namespace upc {
     ///	   .
 	/// In either case, the lag should not exceed that of the minimum value of the pitch.
 
+    vector<float>::const_iterator k = r.begin() + 1;
+    while (k < r.end() && *k >= 0) {
+      k++;
+    }
+
+    vector<float>::const_iterator inicio = k;
+    if (inicio < r.begin() + npitch_min) {
+        inicio = r.begin() + npitch_min;
+    }
     
-    for (iR = iRMax; (iR < r.begin() + npitch_max - 1 && iR < r.end()); iR++){
+    iRMax = inicio;
+    for (iR = inicio; iR < r.begin() + npitch_max && iR < r.end(); iR++){
       if(*iR > *iRMax){
         iRMax = iR;
- 
       }
     }
 

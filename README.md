@@ -15,9 +15,19 @@ Ejercicios básicos
 
    * Complete el cálculo de la autocorrelación e inserte a continuación el código correspondiente.
 
+```cpp
+      r[l] = 0;
+      for (unsigned int n = l; n < x.size(); n++) {
+        r[l] = r[l] + x[n] * x[n - l];
+      }
+      r[l] = r[l] / x.size();
+```
+
    * Inserte una gŕafica donde, en un *subplot*, se vea con claridad la señal temporal de un segmento de
      unos 30 ms de un fonema sonoro y su periodo de pitch; y, en otro *subplot*, se vea con claridad la
 	 autocorrelación de la señal y la posición del primer máximo secundario.
+
+![Gráfica de Autocorrelación](autocorr_plot.png)
 
 	 NOTA: es más que probable que tenga que usar Python, Octave/MATLAB u otro programa semejante para
 	 hacerlo. Se valorará la utilización de la biblioteca matplotlib de Python.
@@ -25,7 +35,35 @@ Ejercicios básicos
    * Determine el mejor candidato para el periodo de pitch localizando el primer máximo secundario de la
      autocorrelación. Inserte a continuación el código correspondiente.
 
+```cpp
+    vector<float>::const_iterator k = r.begin() + 1;
+    while (k < r.end() && *k >= 0) {
+      k++;
+    }
+
+    vector<float>::const_iterator inicio = k;
+    if (inicio < r.begin() + npitch_min) {
+        inicio = r.begin() + npitch_min;
+    }
+    
+    iRMax = inicio;
+    for (iR = inicio; iR < r.begin() + npitch_max && iR < r.end(); iR++){
+      if(*iR > *iRMax){
+        iRMax = iR;
+      }
+    }
+
+    unsigned int lag = iRMax - r.begin();
+```
+
    * Implemente la regla de decisión sonoro o sordo e inserte el código correspondiente.
+
+```cpp
+    if (pot < llindar_pot || r1norm < llindar_r1norm || rmaxnorm < llindar_rmaxnorm)
+      return true;
+    else
+      return false;
+```
 
    * Puede serle útil seguir las instrucciones contenidas en el documento adjunto `código.pdf`.
 
@@ -45,16 +83,36 @@ Ejercicios básicos
 	    Recuerde configurar los paneles de datos para que el desplazamiento de ventana sea el adecuado, que
 		en esta práctica es de 15 ms.
 
+![Análisis de sonoridad](features_plot.png)
+Como el enunciado valora el uso de alternativas de mayor calidad, se ha generado esta gráfica en Python (matplotlib) para visualizar mejor la señal frente a los tres candidatos (pot, r1norm, rmaxnorm), ya que en Wavesurfer las escalas impiden verlos correctamente juntos. Se muestran también los umbrales óptimos calculados.
+
       - Use el estimador de pitch implementado en el programa `wavesurfer` en una señal de prueba y compare
 	    su resultado con el obtenido por la mejor versión de su propio sistema.  Inserte una gráfica
 		ilustrativa del resultado de ambos estimadores.
-     
+
 		Aunque puede usar el propio Wavesurfer para obtener la representación, se valorará
 	 	el uso de alternativas de mayor calidad (particularmente Python).
+
+![Comparación de estimadores](compare_plot.png)
+Aprovechando la sugerencia del enunciado, se presenta esta comparativa generada con Python. Se superpone el pitch de referencia (en color azul) con la estimación producida por este estimador en el archivo `prueba.f0` (en color rojo).
   
   * Optimice los parámetros de su sistema de estimación de pitch e inserte una tabla con las tasas de error
     y el *score* TOTAL proporcionados por `pitch_evaluate` en la evaluación de la base de datos 
 	`pitch_db/train`..
+
+| Parámetros (`--pot`, `--r1norm`, `--rmaxnorm`) | Score TOTAL |
+| :--- | :---: |
+| `-50`, `0.4`, `0.3` | 89.81 % |
+| `-50`, `0.4`, `0.4` | **91.49 %** |
+| `-50`, `0.4`, `0.5` | 89.47 % |
+| `-50`, `0.5`, `0.3` | 89.88 % |
+| `-50`, `0.5`, `0.4` | 91.47 % |
+| `-50`, `0.5`, `0.5` | 89.46 % |
+| `-50`, `0.6`, `0.3` | 89.96 % |
+| `-50`, `0.6`, `0.4` | 91.46 % |
+| `-50`, `0.6`, `0.5` | 89.45 % |
+
+Como se observa, los parámetros óptimos encontrados son `--pot -50`, `--r1norm 0.4` y `--rmaxnorm 0.4`, alcanzando un acierto del **91.49%**.
 
 Ejercicios de ampliación
 ------------------------
@@ -68,6 +126,8 @@ Ejercicios de ampliación
 
   * Inserte un *pantallazo* en el que se vea el mensaje de ayuda del programa y un ejemplo de utilización
     con los argumentos añadidos.
+
+![Ayuda docopt](help.png)
 
 - Implemente las técnicas que considere oportunas para optimizar las prestaciones del sistema de estimación
   de pitch.
@@ -92,6 +152,27 @@ Ejercicios de ampliación
   También se valorará la realización de un estudio de los parámetros involucrados. Por ejemplo, si se opta
   por implementar el filtro de mediana, se valorará el análisis de los resultados obtenidos en función de
   la longitud del filtro.
+
+### Filtro de mediana como postprocesado
+
+Para mejorar el rendimiento del estimador básico y eliminar los "Gross Errors" (errores gruesos como saltos de octava o falsos enmudecimientos de 1 solo frame), se ha implementado un filtro de mediana de tamaño 3. 
+
+El filtro toma ventanas de 3 valores consecutivos del pitch estimado (`f0[i-1]`, `f0[i]`, `f0[i+1]`) y sustituye el valor central por el que queda en el medio al ordenarlos. El código añadido en `get_pitch.cpp` es el siguiente:
+
+```cpp
+  if (f0.size() > 2) {
+    vector<float> f0_f = f0;
+    for (unsigned int i = 1; i < f0.size() - 1; ++i) {
+      float a = f0[i-1], b = f0[i], c = f0[i+1];
+      if ((a <= b && b <= c) || (c <= b && b <= a)) f0_f[i] = b;
+      else if ((b <= a && a <= c) || (c <= a && a <= b)) f0_f[i] = a;
+      else f0_f[i] = c;
+    }
+    f0 = f0_f;
+  }
+```
+
+La aplicación de esta técnica ha supuesto una mejora notable en la tasa de acierto, pasando por ejemplo de un 90.86% a un **91.49%** (el máximo alcanzado) para la mejor combinación de hiperparámetros.
    
 
 Evaluación *ciega* del estimador

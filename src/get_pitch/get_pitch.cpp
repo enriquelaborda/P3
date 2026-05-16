@@ -83,6 +83,17 @@ int main(int argc, const char *argv[]) {
   /// \TODO
   /// Postprocess the estimation in order to supress errors. For instance, a median filter
   /// or time-warping may be used.
+  
+  if (f0.size() > 2) {
+    vector<float> f0_f = f0;
+    for (unsigned int i = 1; i < f0.size() - 1; ++i) {
+      float a = f0[i-1], b = f0[i], c = f0[i+1];
+      if ((a <= b && b <= c) || (c <= b && b <= a)) f0_f[i] = b;
+      else if ((b <= a && a <= c) || (c <= a && a <= b)) f0_f[i] = a;
+      else f0_f[i] = c;
+    }
+    f0 = f0_f;
+  }
 
   // Write f0 contour into the output file
   ofstream os(output_txt);
