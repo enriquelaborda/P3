@@ -94,7 +94,7 @@ Aunque puede usar el propio Wavesurfer para obtener la representación, se valor
 el uso de alternativas de mayor calidad (particularmente Python).
 
 ![Comparación de estimadores](compare_plot.png)
-Aprovechando la sugerencia del enunciado, se presenta esta comparativa generada con Python. Se superpone el pitch de referencia (en color azul) con la estimación producida por este estimador en el archivo `prueba.f0` (en color rojo).
+Aprovechando lo que recomienda el enunciado, presentamos esta comparativa generada con Python. Se compara el pitch de referencia (en color azul) con la estimación producida por este estimador en el archivo `prueba.f0` (en color rojo).
   
   * Optimice los parámetros de su sistema de estimación de pitch e inserte una tabla con las tasas de error
     y el *score* TOTAL proporcionados por `pitch_evaluate` en la evaluación de la base de datos 
