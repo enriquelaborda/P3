@@ -172,8 +172,7 @@ El filtro toma ventanas de 3 valores consecutivos del pitch estimado (`f0[i-1]`,
   }
 ```
 
-La aplicación de esta técnica ha supuesto una mejora notable en la tasa de acierto, pasando por ejemplo de un 90.86% a un **91.49%** (el máximo alcanzado) para la mejor combinación de hiperparámetros.
-   
+La aplicación de esta técnica ha supuesto una mejora notable en la tasa de acierto, pasando por ejemplo de un 90.86% a un **91.49%** (el máximo alcanzado).
 
 Evaluación *ciega* del estimador
 -------------------------------
