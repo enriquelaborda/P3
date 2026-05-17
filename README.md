@@ -90,8 +90,8 @@ Use el estimador de pitch implementado en el programa `wavesurfer` en una señal
 su resultado con el obtenido por la mejor versión de su propio sistema.  Inserte una gráfica
 ilustrativa del resultado de ambos estimadores.
 
-		Aunque puede usar el propio Wavesurfer para obtener la representación, se valorará
-	 	el uso de alternativas de mayor calidad (particularmente Python).
+Aunque puede usar el propio Wavesurfer para obtener la representación, se valorará
+el uso de alternativas de mayor calidad (particularmente Python).
 
 ![Comparación de estimadores](compare_plot.png)
 Aprovechando la sugerencia del enunciado, se presenta esta comparativa generada con Python. Se superpone el pitch de referencia (en color azul) con la estimación producida por este estimador en el archivo `prueba.f0` (en color rojo).
