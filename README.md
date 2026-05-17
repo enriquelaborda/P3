@@ -86,9 +86,9 @@ Ejercicios básicos
 ![Análisis de sonoridad](features_plot.png)
 Como el enunciado valora el uso de alternativas de mayor calidad, se ha generado esta gráfica en Python (matplotlib) para visualizar mejor la señal frente a los tres candidatos (pot, r1norm, rmaxnorm), ya que en Wavesurfer las escalas impiden verlos correctamente juntos. Se muestran también los umbrales óptimos calculados.
 
-      - Use el estimador de pitch implementado en el programa `wavesurfer` en una señal de prueba y compare
-	    su resultado con el obtenido por la mejor versión de su propio sistema.  Inserte una gráfica
-		ilustrativa del resultado de ambos estimadores.
+Use el estimador de pitch implementado en el programa `wavesurfer` en una señal de prueba y compare
+su resultado con el obtenido por la mejor versión de su propio sistema.  Inserte una gráfica
+ilustrativa del resultado de ambos estimadores.
 
 		Aunque puede usar el propio Wavesurfer para obtener la representación, se valorará
 	 	el uso de alternativas de mayor calidad (particularmente Python).
