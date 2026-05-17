@@ -11,7 +11,7 @@ namespace upc {
   void PitchAnalyzer::autocorrelation(const vector<float> &x, vector<float> &r) const {
 
     for (unsigned int l = 0; l < r.size(); ++l) {
-  		/// \TODO Compute the autocorrelation r[l]
+  		/// \DONE Compute the autocorrelation r[l]
       /**
       \DONE Autocorrelación calculada
       \f[
@@ -41,7 +41,7 @@ namespace upc {
 
     switch (win_type) {
     case HAMMING:
-      /// \TODO Implement the Hamming window
+      /// \DONE Implement the Hamming window
       for (unsigned int i = 0; i < frameLen; i++) {
         window[i] = 0.53836F - 0.46164F * cos(2.0F * M_PI * i / (frameLen - 1));
       }
@@ -65,7 +65,7 @@ namespace upc {
   }
 
   bool PitchAnalyzer::unvoiced(float pot, float r1norm, float rmaxnorm) const {
-    /// \TODO Implement a rule to decide whether the sound is voiced or not.
+    /// \DONE Implement a rule to decide whether the sound is voiced or not.
     /// * You can use the standard features (pot, r1norm, rmaxnorm),
     ///   or compute and use other ones.
     if (pot < llindar_pot || r1norm < llindar_r1norm || rmaxnorm < llindar_rmaxnorm)
@@ -89,7 +89,7 @@ namespace upc {
 
     vector<float>::const_iterator iR = r.begin(), iRMax = r.begin() + npitch_min;
 
-    /// \TODO 
+    /// \DONE
 	/// Find the lag of the maximum value of the autocorrelation away from the origin.<br>
 	/// Choices to set the minimum value of the lag are:
 	///    - The first negative value of the autocorrelation.

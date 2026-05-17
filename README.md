@@ -84,7 +84,7 @@ Ejercicios básicos
 		en esta práctica es de 15 ms.
 
 ![Análisis de sonoridad](features_plot.png)
-Dado que se recomienda el uso de alternativas de mayor calidad, hemos generado esta gráfica en Python (matplotlib) para visualizar mejor la señal frente a los tres candidatos (pot, r1norm, rmaxnorm), ya que en Wavesurfer las escalas impiden verlos correctamente juntos. Se muestran también los umbrales óptimos calculados.
+Dado que se recomienda el uso de alternativas de mayor calidad, hemos generado esta gráfica en Python (matplotlib) para visualizar mejor la estimación de pitch de Wavesurfer frente a los tres candidatos (pot, r1norm, rmaxnorm), ya que en Wavesurfer las escalas impiden verlos correctamente juntos. Se muestran también los umbrales óptimos calculados.
 
 Use el estimador de pitch implementado en el programa `wavesurfer` en una señal de prueba y compare
 su resultado con el obtenido por la mejor versión de su propio sistema.  Inserte una gráfica
@@ -173,6 +173,47 @@ El filtro toma ventanas de 3 valores consecutivos del pitch estimado (`f0[i-1]`,
 ```
 
 La aplicación de esta técnica ha supuesto una mejora notable en la tasa de acierto, pasando por ejemplo de un 90.86% a un **91.49%** (el máximo alcanzado).
+
+### Filtrado paso bajo (Preprocesado)
+
+Con el fin de suavizar la señal de audio y atenuar el efecto de las altas frecuencias (en especial de los formantes, que pueden introducir picos secundarios engañosos en la autocorrelación), hemos incorporado un filtro paso bajo de primer orden.
+
+La ecuación en diferencias empleada sobre la señal antes del análisis por tramas es: $y[n] = 0.5 \cdot x[n] + 0.5 \cdot y[n-1]$. El código correspondiente añadido en `get_pitch.cpp` es:
+
+```cpp
+  for (unsigned int i = 1; i < x.size(); ++i) {
+    x[i] = 0.5f * x[i] + 0.5f * x[i-1];
+  }
+```
+
+Esta técnica estabiliza la autocorrelación al centrarse en la banda de frecuencias donde suele residir el pitch humano.
+
+### Center Clipping (Preprocesado)
+
+Hemos decidido aplicar la técnica de *center clipping* a la señal porque nos dimos cuenta de que, en ocasiones, los formantes creaban picos secundarios muy altos en la autocorrelación, confundiendo al estimador. Al forzar a cero todos los valores de la señal que no superan un cierto umbral, conseguimos "limpiar" la onda y quedarnos casi exclusivamente con la periodicidad real de las cuerdas vocales, haciendo que el cálculo del pitch sea mucho más directo y evidente.
+
+En la implementación añadida a `get_pitch.cpp`, se ha diseñado para que se recorte todo lo que quede por debajo del 30% del máximo absoluto de la señal:
+
+```cpp
+  float max_val = 0.0f;
+  for (unsigned int i = 0; i < x.size(); ++i) {
+    float val = x[i] > 0 ? x[i] : -x[i];
+    if (val > max_val) max_val = val;
+  }
+  float cl_threshold = max_val * 0.3f;
+  for (unsigned int i = 0; i < x.size(); ++i) {
+    float val = x[i] > 0 ? x[i] : -x[i];
+    if (val < cl_threshold) {
+      x[i] = 0.0f;
+    } else if (x[i] > 0) {
+      x[i] -= cl_threshold;
+    } else {
+      x[i] += cl_threshold;
+    }
+  }
+```
+
+Al combinarse estas dos técnicas de preprocesado junto con el postprocesado del filtro de mediana, el estimador gana gran robustez frente a diferentes calidades de voz y tipos de fonemas.
 
 Evaluación *ciega* del estimador
 -------------------------------

@@ -40,7 +40,7 @@ Arguments:
 )";
 
 int main(int argc, const char *argv[]) {
-	/// \TODO 
+	/// \DONE 
 	///  Modify the program syntax and the call to **docopt()** in order to
 	///  add options and arguments to the program.
     std::map<std::string, docopt::value> args = docopt::docopt(USAGE,
@@ -68,10 +68,33 @@ int main(int argc, const char *argv[]) {
   // Define analyzer
   PitchAnalyzer analyzer(n_len, rate, PitchAnalyzer::RECT, 50, 500, llindar_pot, llindar_r1norm, llindar_rmaxnorm);
 
-  /// \TODO
+  /// \DONE
   /// Preprocess the input signal in order to ease pitch estimation. For instance,
   /// central-clipping or low pass filtering may be used.
   
+  // 1. Filtrado paso bajo (Low-pass filter)
+  for (unsigned int i = 1; i < x.size(); ++i) {
+    x[i] = 0.5f * x[i] + 0.5f * x[i-1];
+  }
+
+  // 2. Center clipping
+  float max_val = 0.0f;
+  for (unsigned int i = 0; i < x.size(); ++i) {
+    float val = x[i] > 0 ? x[i] : -x[i];
+    if (val > max_val) max_val = val;
+  }
+  float cl_threshold = max_val * 0.3f;
+  for (unsigned int i = 0; i < x.size(); ++i) {
+    float val = x[i] > 0 ? x[i] : -x[i];
+    if (val < cl_threshold) {
+      x[i] = 0.0f;
+    } else if (x[i] > 0) {
+      x[i] -= cl_threshold;
+    } else {
+      x[i] += cl_threshold;
+    }
+  }
+
   // Iterate for each frame and save values in f0 vector
   vector<float>::iterator iX;
   vector<float> f0;
@@ -80,7 +103,7 @@ int main(int argc, const char *argv[]) {
     f0.push_back(f);
   }
 
-  /// \TODO
+  /// \DONE
   /// Postprocess the estimation in order to supress errors. For instance, a median filter
   /// or time-warping may be used.
   
