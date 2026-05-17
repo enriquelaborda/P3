@@ -155,7 +155,7 @@ Ejercicios de ampliación
 
 ### Filtro de mediana como postprocesado
 
-Para mejorar el rendimiento del estimador básico y eliminar los "Gross Errors" (errores gruesos como saltos de octava o falsos enmudecimientos de 1 solo frame), se ha implementado un filtro de mediana de tamaño 3. 
+Para mejorar el rendimiento del estimador básico se ha implementado un filtro de mediana de tamaño 3. 
 
 El filtro toma ventanas de 3 valores consecutivos del pitch estimado (`f0[i-1]`, `f0[i]`, `f0[i+1]`) y sustituye el valor central por el que queda en el medio al ordenarlos. El código añadido en `get_pitch.cpp` es el siguiente:
 
